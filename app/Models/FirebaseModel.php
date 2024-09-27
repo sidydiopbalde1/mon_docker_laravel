@@ -60,7 +60,7 @@ class FirebaseModel
             //  dd(json_decode($firebase_credentiels, true));
             $factory = (new Factory)
                 ->withServiceAccount(json_decode($firebase_credentiels, true))
-                ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
+                ->withDatabaseUri("https://laravel-gestion-pedagogique-default-rtdb.firebaseio.com/");
         
             $this->database = $factory->createDatabase();
             $this->auth = $factory->createAuth();
