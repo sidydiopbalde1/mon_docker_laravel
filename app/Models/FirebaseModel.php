@@ -13,14 +13,20 @@ class FirebaseModel
     protected $storage;
     public function __construct()
     {
-        $firebase_credentiels=base64_decode(env("FIREBASE_KEY_BASE64"));
-        $factory = (new Factory)
-            ->withServiceAccount(json_decode($firebase_credentiels,true))
-            ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
-
-        $this->database = $factory->createDatabase();
-        $this->auth = $factory->createAuth();
-        $this->storage = $factory->createStorage();
+        try {
+            $firebase_credentiels = base64_decode(env("FIREBASE_KEY_BASE64"));
+            // dd(json_decode($firebase_credentiels, true));
+            $factory = (new Factory)
+                ->withServiceAccount(json_decode($firebase_credentiels, true))
+                ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
+        
+            $this->database = $factory->createDatabase();
+            $this->auth = $factory->createAuth();
+            $this->storage = $factory->createStorage();
+        } catch (\Exception $e) {
+            // Gérer l'erreur ici
+            throw new \Exception('Erreur lors de la configuration de Firebase: ' . $e->getMessage());
+        }
      
     }
 
