@@ -14,8 +14,50 @@ class FirebaseModel
     public function __construct()
     {
         try {
-            $firebase_credentiels = base64_decode(env("FIREBASE_KEY_BASE64"));
-            // dd(json_decode($firebase_credentiels, true));
+            $firebase_credentiels = base64_decode("ewogICJ0eXBlIjogInNlcnZpY2VfYWNjb3VudCIsCiAgInByb2plY3RfaWQiOiAibGFyYXZlbC1n
+            ZXN0aW9uLXBlZGFnb2dpcXVlIiwKICAicHJpdmF0ZV9rZXlfaWQiOiAiZjY3Y2M1N2MzZjdiNDJm
+            YjhkZGFhNmIzMTlhZTM5MTNkMTU3OTQ2OCIsCiAgInByaXZhdGVfa2V5IjogIi0tLS0tQkVHSU4g
+            UFJJVkFURSBLRVktLS0tLVxuTUlJRXZBSUJBREFOQmdrcWhraUc5dzBCQVFFRkFBU0NCS1l3Z2dT
+            aUFnRUFBb0lCQVFDY0RSZ3VEdXhZbkd5RlxuSlNjMnpmbmh5b1hOdGtMWmwvWm9HYUw2QmY5bVNs
+            Vk5zOUV6VTh1YzRZTFZFTlExMVVOTGtaMXhydk5BY2FjcFxuK3g4Sm5pVGtSZUNEWWxPd1NzUm1C
+            TWlkdW1hNWVtR1N4RmppYWRSSXV2a1J0cmVjcVF2Wkt0WE1rdnRORWxGdVxueXcza2cvMi9hZlo5
+            ZDhyN0grVlZKTzNWTG1pRkZsaXIvcFEzWFN5cStBZTRzRTR3S1ZDR1lNUVpnV2FSdStJN1xucFhB
+            NmpJOXZLMWhKNlR2YzllQWloYU5WTi8zRG5nNUY1ZGp4c25TbEREcU5KS2tDK3BKMGdlRXlyN1Z1
+            VkhJZ1xuQ0hpd3FzajRhc1RNMlVPWDBSM01pNlJzcXkxZWN3SHIrYXJ4UE9ObEVBNE1SZTBiWE1w
+            M3lPOFh2ZkZNTzNlWVxuWjBuSVRQbk5BZ01CQUFFQ2dnRUFEbEdmUmQ2bHJpM1FRVmxhNDByOElr
+            MUFnTk00Q0JwTENGdE4ybzVCVktQK1xuZHM1SXBHS01mTjB1Y1ptRk4xbFZ2dkhpRmdQZEd5MHlq
+            d1lWWDM4TTJJdFc0Z2RjTVlGeXl2K21YdDZ6UFZLdVxuOEZZbTU4T1pNSUZEaUc0UkpBVlk2bmps
+            UEV2Q1ZseVhiMGlmZ2pmZ1NUZVNZQW5sYkt5TkVRWjk4a0U3WXZhNFxud0lpendpRHhJNWtMNmRr
+            Rm1EbG1ybC9xZExtMTgyYlk2Q3BNZHI2TVRuRmVZaWZ6OHcwa0M5Z2FLQTF1ekZHTlxuSTFJL2xV
+            bXNmT0o3alNWK2Z4NHQ4bmI5czNYUEdPL0VFUzFKWUMyZnFPSEpUcUlIcVBXVWNhWDZWdzhDRkZz
+            WlxuV3R3ZkNQZUxqYWpWR3dNM081bzRqVlBrY2pIY1FTbWJvRzk4cGFkS3NRS0JnUURQZXkrMUda
+            LzR2cVdRZ0o3dlxuSUlLb3l1S0lITE9JNEI5K0RxbE5xM2lLWFl6N01wR3FJaHIzYkcveGcyUVZv
+            d09nTHdlU2dINVhmSUdOczVNVFxuQWg3QkFybEYxL0lzZWRITGhaMkVQblBpUG8xcmdyd3Zrd296
+            SGttWUszY1JKZWtZZENOVkRLV2x4OVZDSUJjWlxuMGFTL3FEcXNGUVRxMWFhb0JwcldrWDVPNVFL
+            QmdRREFpdzl3YXZSQndja3lCa2l4MUdudWp3Q2RaNnZZSjZCQVxuaXhteDZoMlRKa2VCVVdUNWZ3
+            b0g1U1A2SkJlWnpybDh3cXI3TjhrcUF5VDU0RnRZTlBxdDVFSmxKSHU5UGpUVVxud0tHaWlwQ2x5
+            SzU5MFpvejdRNEpGbjhDaHBSTEUyNDdZRkZlcmhpOWpXQjdWNjZYWmdKZFNpNzUrZ0VEeDcrZlxu
+            ODcvWWRvUm95UUtCZ0ZBeHlmL1N0cjFiV3YwZWFjLzluZU1HQUVjaDZOYm40ZVJFWUhZUDU5aDdU
+            a210Z3hYaVxuZHMvWmp1OG5uT0NzRUhPeW1kZXJhS29DQ3NVdGVwUm5SbUhOM3JTN1FmU2s1VTBv
+            Q1BrYmRva2xLbDQ2dXVnY1xuaWwyMXdEWmIzbnEzVDRCUEszVHRIWDJWWHIxZlQrNS8xSkRyd2pu
+            UEtnWm1yRExYMHJOS3F5cHRBb0dBYmNGWFxuUmEvU0dJSE1uSlYwYnRvMG9HWW41WklwSlFoQmsw
+            azNsbkZyOW11RnF6T29xWWcvUVl6ZTIwSWpxZXRyVkxEclxuSWxVRWVNeGVFWXBReDVFN3JGQkhn
+            THd4UlFqbXVMZ3Q2eWV0bUxNeXRFbjg2c2lnalpHalNOOUtQUm1RWm94YlxuRmV1TDh0RmFSRFVS
+            TXdCVkxMU1MzckFpVC9OWFNtaDUzWHlCc2ZFQ2dZQkhZMzYrczRDdExIMXNHamg4S2dLQVxuL3dM
+            cmxZMzNERWY4b25wdmw0Mi9Dd2RGRFdjNFJqakpuaGNUdThtWncyc3dJcU5ZOGF0OW9JNHgwY2NL
+            M0pCT1xuUzhRTk40ZUg2bjRVN0tmcU9zcGp3ekkxeVR0NGlYbG5ZUmJraFFXeXlRYXNJM2VXZ1I2
+            Y0lqQXU3LzBKenVRa1xuNjE4VVZiNEFYaG5NcTAxN1RRUm5wdz09XG4tLS0tLUVORCBQUklWQVRF
+            IEtFWS0tLS0tXG4iLAogICJjbGllbnRfZW1haWwiOiAiZmlyZWJhc2UtYWRtaW5zZGstOTk4czdA
+            bGFyYXZlbC1nZXN0aW9uLXBlZGFnb2dpcXVlLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwKICAi
+            Y2xpZW50X2lkIjogIjEwOTIzNDIxMTY1NTE5MDMyNzU3NSIsCiAgImF1dGhfdXJpIjogImh0dHBz
+            Oi8vYWNjb3VudHMuZ29vZ2xlLmNvbS9vL29hdXRoMi9hdXRoIiwKICAidG9rZW5fdXJpIjogImh0
+            dHBzOi8vb2F1dGgyLmdvb2dsZWFwaXMuY29tL3Rva2VuIiwKICAiYXV0aF9wcm92aWRlcl94NTA5
+            X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL29hdXRoMi92MS9jZXJ0cyIs
+            CiAgImNsaWVudF94NTA5X2NlcnRfdXJsIjogImh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL3Jv
+            Ym90L3YxL21ldGFkYXRhL3g1MDkvZmlyZWJhc2UtYWRtaW5zZGstOTk4czclNDBsYXJhdmVsLWdl
+            c3Rpb24tcGVkYWdvZ2lxdWUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLAogICJ1bml2ZXJzZV9k
+            b21haW4iOiAiZ29vZ2xlYXBpcy5jb20iCn0=");
+             dd(json_decode($firebase_credentiels, true));
             $factory = (new Factory)
                 ->withServiceAccount(json_decode($firebase_credentiels, true))
                 ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
