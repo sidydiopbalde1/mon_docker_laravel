@@ -57,7 +57,7 @@ class FirebaseModel
             Ym90L3YxL21ldGFkYXRhL3g1MDkvZmlyZWJhc2UtYWRtaW5zZGstOTk4czclNDBsYXJhdmVsLWdl
             c3Rpb24tcGVkYWdvZ2lxdWUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLAogICJ1bml2ZXJzZV9k
             b21haW4iOiAiZ29vZ2xlYXBpcy5jb20iCn0=");
-             dd(json_decode($firebase_credentiels, true));
+            //  dd(json_decode($firebase_credentiels, true));
             $factory = (new Factory)
                 ->withServiceAccount(json_decode($firebase_credentiels, true))
                 ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
