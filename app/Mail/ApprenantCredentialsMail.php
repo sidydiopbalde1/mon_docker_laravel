@@ -10,35 +10,39 @@ class ApprenantCredentialsMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $email;
-    public $matricule;
-    public $defaultPassword;
-    public $qrcode;
+    protected $data;
 
-    public function __construct($email, $defaultPassword, $matricule, $qrcode)
+    /**
+     * ApprenantCredentialsMail constructor.
+     * @param array $data Tableau d'arguments contenant les informations de l'apprenant
+     */
+    public function __construct(array $data)
     {
-        $this->email = $email;
-        $this->matricule = $matricule;
-        $this->defaultPassword = $defaultPassword;
-        $this->qrcode = $qrcode; // Correct assignment
+        // Stocker les données dans une propriété
+        $this->data = $data;
     }
 
     public function build()
     {
-        // dd($this->email);
-        if (empty($this->qrcode)) {
-            Log::error("QR code non disponible pour : {$this->email}");
+        // Vérification du QR code avant envoi
+        if (empty($this->data['qrcode'])) {
+            Log::error("QR code non disponible pour : {$this->data['email']}");
         }
-    
+
+        // Générer l'e-mail avec les données fournies
         return $this->subject('Vos informations de connexion')
                     ->view('emails.relance_app')
                     ->with([
-                        'email' => $this->email,
-                        'password' => $this->defaultPassword,
-                        'loginLink' => route('login'),
-                        'qrcode' => $this->qrcode,
+                        'email' => $this->data['email'] ?? 'Non spécifié',
+                        'password' => $this->data['password'] ?? 'Non spécifié',
+                        'matricule' => $this->data['matricule'] ?? 'Non spécifié',
+                        'loginLink' => $this->data['loginLink'] ?? route('login'),
+                        'qrcode' => $this->data['qrcode'] ?? null,
                     ])
-                    ->attach($this->qrcode);
+                    // Attacher le QR code si disponible
+                    ->attach($this->data['qrcode'] ?? '', [
+                        'as' => 'qrcode.png',
+                        'mime' => 'image/png',
+                    ]);
     }
-    
 }

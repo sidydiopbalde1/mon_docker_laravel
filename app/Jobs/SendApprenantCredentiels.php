@@ -1,30 +1,44 @@
 <?php
+
 use App\Mail\ApprenantCredentialsMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use App\Models\ApprenantFirebaseModel;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Support\Facades\Mail;
+
 class SendApprenantCredentials implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    protected $apprenant;
-    protected $password;
-    public function __construct(ApprenantFirebaseModel $apprenant,$password)
+
+    protected $params;
+
+    /**
+     * Crée une nouvelle instance du job.
+     *
+     * @param array $params
+     */
+    public function __construct(array $params)
     {
-        if (!isset($apprenant->email)) {
+        // Vérification que l'email est fournie
+        if (empty($params['email'])) {
             throw new \Exception("L'email de l'apprenant est manquante.");
         }
-        $this->apprenant = $apprenant;
-        $this->password = $password;
+
+        $this->params = $params;
     }
+
+    /**
+     * Gérer le job pour envoyer l'email.
+     *
+     * @return void
+     */
     public function handle()
     {
-        // Vérifie que l'apprenant a un email avant d'envoyer le mail
-        if ($this->apprenant->email) {
-            // Mail::to($this->apprenant->email)->send(new ApprenantCredentialsMail($this->apprenant,$this->password));
+        // Envoi de l'email avec les informations de connexion
+        if (!empty($this->params['email'])) {
+            Mail::to($this->params['email'])->send(new ApprenantCredentialsMail($this->params));
         }
     }
 }

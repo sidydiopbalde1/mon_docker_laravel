@@ -19,7 +19,7 @@ class ReferentielFirebaseService implements ReferentielFirebaseServiceInterface
         if (!$referentiel) {
             throw new Exception("Référentiel non trouvé.");
         }
-        $competence = $this->formatCompetences($competenceData);
+        $competence = $this->formatCompetencesAsObjects($competenceData);
         $referentiel['competences'][] = $competence;
         return $this->referentielRepository->update($referentielId, ['competences' => $referentiel['competences']]);
     }
@@ -75,20 +75,8 @@ class ReferentielFirebaseService implements ReferentielFirebaseServiceInterface
     }
     public function createReferentiel(array $data)
     {
-        // Validation des champs uniques (si nécessaire)
-        // $existingReferentiel = $this->referentielRepository->findByCodeOrLibelle($data['code'], $data['libelle']);
-        // if ($existingReferentiel) {
-        //     throw new Exception('Le code ou le libellé existe déjà.');
-        // }
-    
-        // Générer un identifiant numérique aléatoire (par exemple, entre 100000 et 999999)
+        // Générer un identifiant numérique aléatoire pour le référentiel (par exemple, entre 100000 et 999999)
         $randomId = random_int(100000, 999999);
-    
-        // Vérifier si l'ID existe déjà dans la base de données Firebase
-        // $existingReferentielById = $this->referentielRepository->find('referentiels', $randomId);
-        // if ($existingReferentielById) {
-        //     throw new Exception('L\'identifiant généré existe déjà, veuillez réessayer.');
-        // }
     
         // Structure du référentiel à sauvegarder
         $referentielData = [
@@ -96,42 +84,58 @@ class ReferentielFirebaseService implements ReferentielFirebaseServiceInterface
             'code' => $data['code'],
             'libelle' => $data['libelle'],
             'description' => $data['description'],
-            'statut' => 'Actif',
+            'statut' => 'Actif',  // Par défaut, statut à "Actif"
             'photo' => $data['photo'] ?? null,
-            'competences' => $this->formatCompetences($data['competences'] ?? [])
+            'competences' => $this->formatCompetencesAsObjects($data['competences'] ?? [])
         ];
     
+        // Sauvegarde dans la base de données via le repository
         return $this->referentielRepository->create($referentielData);
     }
     
-    public function formatCompetences(array $competences)
+    public function formatCompetencesAsObjects(array $competences)
     {
         $formattedCompetences = [];
-        foreach ($competences as $competence) {
-            $formattedCompetence = [
+        foreach ($competences as $key => $competence) {
+            $formattedCompetences[$key] = [
                 'nom' => $competence['nom'],
                 'description' => $competence['description'],
                 'duree_acquisition' => $competence['duree_acquisition'],
                 'type' => $competence['type'],
                 'modules' => $this->formatModules($competence['modules'] ?? [])
             ];
-            $formattedCompetences[] = $formattedCompetence;
         }
         return $formattedCompetences;
     }
+    
     public function formatModules(array $modules)
     {
         $formattedModules = [];
         foreach ($modules as $module) {
+            // Générer un identifiant aléatoire pour chaque module
+            $moduleId = bin2hex(random_bytes(8));  // Génère un identifiant aléatoire de 16 caractères hexadécimaux
+    
+            // Calcul de la moyenne des notes si des notes sont fournies
+            $notes = $module['notes'] ?? [];
+            $moyenne = count($notes) > 0 ? array_sum($notes) / count($notes) : null;
+    
             $formattedModule = [
+                'id' => $moduleId,  // ID aléatoire généré pour le module
                 'nom' => $module['nom'],
                 'description' => $module['description'],
                 'duree_acquisition' => $module['duree_acquisition'],
+                'notes' => $notes,  // Les notes du module
+                'moyenne' => $moyenne,  // Calcul de la moyenne des notes
+                'appreciation' => $module['appreciation'] ?? null // Appréciation facultative
             ];
+    
             $formattedModules[] = $formattedModule;
         }
         return $formattedModules;
     }
+    
+    
+    
     public function getCompetencesByReferentiel(string $referentielId)
     {
         return $this->referentielRepository->getCompetencesByReferentiel($referentielId);

@@ -9,28 +9,18 @@
       "post": {
         "tags": ["Users"],
         "summary": "Create a new user in Firebase",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
+              "schema": {"$ref": "#/components/schemas/User"}
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "User created successfully"
-          },
-          "400": {
-            "description": "Bad request"
-          }
+          "201": {"description": "User created successfully"},
+          "400": {"description": "Bad request"}
         }
       }
     },
@@ -38,129 +28,77 @@
       "put": {
         "tags": ["Users"],
         "summary": "Update user by ID",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
+              "schema": {"$ref": "#/components/schemas/User"}
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "User updated successfully"
-          },
-          "404": {
-            "description": "User not found"
-          }
+          "200": {"description": "User updated successfully"},
+          "404": {"description": "User not found"}
         }
       },
       "patch": {
         "tags": ["Users"],
         "summary": "Partially update user by ID",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/User"
-              }
+              "schema": {"$ref": "#/components/schemas/User"}
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "User updated partially"
-          },
-          "404": {
-            "description": "User not found"
-          }
+          "200": {"description": "User updated partially"},
+          "404": {"description": "User not found"}
         }
       },
       "delete": {
         "tags": ["Users"],
         "summary": "Delete user by ID",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
         "responses": {
-          "200": {
-            "description": "User deleted successfully"
-          },
-          "404": {
-            "description": "User not found"
-          }
+          "200": {"description": "User deleted successfully"},
+          "404": {"description": "User not found"}
         }
       },
       "get": {
         "tags": ["Users"],
         "summary": "Find user by ID",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
         "responses": {
-          "200": {
-            "description": "User found"
-          },
-          "404": {
-            "description": "User not found"
-          }
+          "200": {"description": "User found"},
+          "404": {"description": "User not found"}
         }
       }
     },
@@ -168,39 +106,27 @@
       "get": {
         "tags": ["Users"],
         "summary": "Get all users",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{"bearerAuth": []}],
         "responses": {
-          "200": {
-            "description": "List of users"
-          }
+          "200": {"description": "List of users"}
         }
       }
     },
     "/api/v1/login": {
       "post": {
-        "tags": ["Users"],
+        "tags": ["Authentication"],
         "summary": "User login",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Login"
-              }
+              "schema": {"$ref": "#/components/schemas/Login"}
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Login successful"
-          },
-          "401": {
-            "description": "Unauthorized"
-          }
+          "200": {"description": "Login successful"},
+          "401": {"description": "Unauthorized"}
         }
       }
     },
@@ -209,9 +135,7 @@
         "tags": ["Users"],
         "summary": "Export users to Excel",
         "responses": {
-          "200": {
-            "description": "Excel file exported"
-          }
+          "200": {"description": "Excel file exported"}
         }
       }
     },
@@ -219,39 +143,25 @@
       "get": {
         "tags": ["Referentiels"],
         "summary": "Get all referentiels",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{"bearerAuth": []}],
         "responses": {
-          "200": {
-            "description": "List of referentiels"
-          }
+          "200": {"description": "List of referentiels"}
         }
       },
       "post": {
         "tags": ["Referentiels"],
         "summary": "Create a referentiel",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Referentiel"
-              }
+              "schema": {"$ref": "#/components/schemas/Referentiel"}
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Referentiel created successfully"
-          }
+          "201": {"description": "Referentiel created successfully"}
         }
       }
     },
@@ -259,86 +169,54 @@
       "get": {
         "tags": ["Referentiels"],
         "summary": "Get referentiel by ID",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
         "responses": {
-          "200": {
-            "description": "Referentiel found"
-          },
-          "404": {
-            "description": "Referentiel not found"
-          }
+          "200": {"description": "Referentiel found"},
+          "404": {"description": "Referentiel not found"}
         }
       },
       "put": {
         "tags": ["Referentiels"],
         "summary": "Update referentiel by ID",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Referentiel"
-              }
+              "schema": {"$ref": "#/components/schemas/Referentiel"}
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Referentiel updated successfully"
-          }
+          "200": {"description": "Referentiel updated successfully"},
+          "404": {"description": "Referentiel not found"}
         }
       },
       "delete": {
         "tags": ["Referentiels"],
         "summary": "Delete referentiel by ID",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
         "responses": {
-          "200": {
-            "description": "Referentiel deleted successfully"
-          }
+          "200": {"description": "Referentiel deleted successfully"},
+          "404": {"description": "Referentiel not found"}
         }
       }
     },
@@ -346,121 +224,167 @@
       "post": {
         "tags": ["Promotions"],
         "summary": "Create a promotion",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{"bearerAuth": []}],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Promotion"
-              }
+              "schema": {"$ref": "#/components/schemas/Promotion"}
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Promotion created successfully"
-          }
+          "201": {"description": "Promotion created successfully"}
         }
       },
       "get": {
         "tags": ["Promotions"],
         "summary": "Get all promotions",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "security": [{"bearerAuth": []}],
         "responses": {
-          "200": {
-            "description": "List of promotions"
-          }
+          "200": {"description": "List of promotions"}
         }
       }
     },
-    "/api/v1/promotions/encours": {
+    "/api/v1/promotions/{id}/stats": {
       "get": {
         "tags": ["Promotions"],
-        "summary": "Get active promotion",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
+        "summary": "Get statistics for a specific promotion",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
         "responses": {
-          "200": {
-            "description": "Active promotion found"
-          },
-          "404": {
-            "description": "No active promotion found"
+          "200": {"description": "Promotion stats retrieved"}
+        }
+      }
+    },
+    "/api/v1/apprenants": {
+      "post": {
+        "tags": ["Apprenants"],
+        "summary": "Create a new apprenant",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/Apprenant"}
+            }
           }
+        },
+        "responses": {
+          "201": {"description": "Apprenant created successfully"}
+        }
+      },
+      "get": {
+        "tags": ["Apprenants"],
+        "summary": "Get all apprenants",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {"description": "List of apprenants"}
+        }
+      }
+    },
+    "/api/v1/apprenants/{id}": {
+      "get": {
+        "tags": ["Apprenants"],
+        "summary": "Get apprenant by ID",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
+        "responses": {
+          "200": {"description": "Apprenant found"},
+          "404": {"description": "Apprenant not found"}
+        }
+      },
+      "put": {
+        "tags": ["Apprenants"],
+        "summary": "Update apprenant by ID",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/Apprenant"}
+            }
+          }
+        },
+        "responses": {
+          "200": {"description": "Apprenant updated successfully"}
+        }
+      },
+      "delete": {
+        "tags": ["Apprenants"],
+        "summary": "Delete apprenant by ID",
+        "security": [{"bearerAuth": []}],
+        "parameters": [{
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {"type": "string"}
+        }],
+        "responses": {
+          "200": {"description": "Apprenant deleted successfully"}
         }
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
     "schemas": {
       "User": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "password": {
-            "type": "string"
-          }
+          "email": {"type": "string"},
+          "password": {"type": "string"},
+          "name": {"type": "string"}
         }
       },
       "Login": {
         "type": "object",
         "properties": {
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "password": {
-            "type": "string"
-          }
+          "email": {"type": "string"},
+          "password": {"type": "string"}
         }
       },
       "Referentiel": {
         "type": "object",
         "properties": {
-          "title": {
-            "type": "string"
-          }
+          "name": {"type": "string"}
         }
       },
       "Promotion": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date"
-          }
+          "title": {"type": "string"},
+          "description": {"type": "string"}
         }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+      },
+      "Apprenant": {
+        "type": "object",
+        "properties": {
+          "first_name": {"type": "string"},
+          "last_name": {"type": "string"},
+          "email": {"type": "string"}
+        }
       }
     }
   }

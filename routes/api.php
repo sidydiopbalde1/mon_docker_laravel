@@ -67,10 +67,15 @@ Route::prefix('/v1/apprenants')->group(function () {
 Route::post('/', [ApprennantsFirebaseController::class, 'store']);
 Route::post('/import', [ApprennantsFirebaseController::class, 'import']);
 Route::post('/relance', [ApprennantsFirebaseController::class, 'sendGroupRelance']);
+Route::post('/{id}/relance', [ApprennantsFirebaseController::class, 'sendAppRelanceById']);
 Route::get('/', [ApprennantsFirebaseController::class, 'filterApprenants']);
 Route::get('/{id}', [ApprennantsFirebaseController::class, 'show']);
 // Route::post('/inactive', [ApprennantsFirebaseController::class, 'findApprenantInactif']);
 
+});
+Route::prefix('/v1/notes')->group(function () {
+Route::post('modules/{id}',[ApprennantsFirebaseController::class,'addModuleNotes']);
+Route::post('apprenants',[ApprennantsFirebaseController::class,'addNotesToApprenant']);
 });
 // Route::middleware(['switch.auth'])->group(function () {
 //     Route::get('/v1/referentiels', [ReferentielFirebaseController::class, 'index']);

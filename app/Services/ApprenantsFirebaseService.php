@@ -2,17 +2,15 @@
 namespace App\Services;
 
 use App\Exports\ApprenantsErreursExport;
-use App\Jobs\SendAuthEmailJob;
 use App\Repository\ApprenantsFirebaseRepository;
-use App\Repository\ReferentielFirebaseRepository;
-use App\Jobs\SendApprenantCredentials;
-use App\Models\ApprenantFirebaseModel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
-use Endroid\QrCode\QrCode; 
 use SendApprenantCredentials as GlobalSendApprenantCredentials;
 use App\Jobs\SendRelanceJob;
+use App\Services\UserFirebaseService;
+use App\Repository\UserFirebaseRepository;
+use Illuminate\Http\Request;
 
 class ApprenantsFirebaseService implements ApprenantsFirebaseServiceInterface
 {
@@ -29,64 +27,123 @@ class ApprenantsFirebaseService implements ApprenantsFirebaseServiceInterface
     }
     public function createApprenant(array $data)
     {
-
-        if (!isset($data['user_id'])) {
-            return ['error' => 'L\'ID de l\'utilisateur est requis.'];
+        // Vérifier que les informations utilisateur sont fournies dans $data
+        if (!isset($data['nom']) || !isset($data['prenom']) || !isset($data['email'])) {
+            return ['error' => 'Les informations de l\'utilisateur (nom, prénom, email) sont requises.'];
         }
-
-        $userData = $this->apprenantsRepository->findApprenantById($data['user_id']);
-        $referentielData = $this->referentielService->findRefById($data['referentiel_id']);
-
-        if (!$userData) {
-            return ['error' => 'Utilisateur non trouvé.'];
-        }
-
+    
+        // Génération du matricule
         $matricule = $this->generateMatricule();
-
-        // Préparer les données Firebase
+    
+        // Créer l'utilisateur dans Firebase (simultanément avec l'apprenant)
+        $userData = [
+            'nom' => $data['nom'],
+            'prenom' => $data['prenom'],
+            'email' => $data['email'],
+            'photoCouverture' => $data['photo'] ?? null,
+            'fonction' => $data['fonction_id'] ?? null,
+            'adresse' => $data['adresse'] ?? null,
+            'telephone' => $data['telephone'] ?? null,
+            'statut' => "Inactif",
+            'matricule' => $matricule,
+            'referentiel_id' => $data['referentiel_id'],
+        ];
+    
+        // Création de l'utilisateur dans Firebase
+        $userFirebaseService = new UserFirebaseService(new UserFirebaseRepository());
+        $userFirebaseService->createUser($userData);
+    
+        // Récupérer les données du référentiel (incluant les compétences et modules existants)
+        $referentielData = $this->referentielService->findRefById($data['referentiel_id']);
+        if (!$referentielData) {
+            return ['error' => 'Référentiel non trouvé.'];
+        }
+    
+        // Préparer les données de l'apprenant pour Firebase
         $firebaseData = [
-            'user' => [
-                'id' => $userData['id'],
-                'nom' => $userData['nom'],
-                'prenom' => $userData['prenom'],
-                'email' => $userData['email'],
-                'photoCouverture' => $userData['photo'] ?? null,
-                'fonction' => $userData['fonction_id'],
-                'adresse' => $userData['adresse'],
-                'telephone' => $userData['telephone'],
-                'statut' => $userData['statut'],
-                'referentiel_id' => $data['referentiel_id'],
-            ],
+            'user' => $userData,
             'referentiels' => $referentielData,
-            'presences' => [],  // Initialisation vide
+            'presences' => [], // Initialisation des présences
+            'competences' => $referentielData['competences'], // Utiliser les compétences du référentiel
             'statut' => 'En attente',
             'matricule' => $matricule,
         ];
-
-        // Ajouter les présences
+    
+        // Ajouter les présences en fonction du format d'entrée
         if (isset($data['presences'])) {
             foreach ($data['presences'] as $mois => $dates) {
                 foreach ($dates as $date => $emargements) {
-                    // Remplacer / par - dans les dates
-                    $formattedDate = str_replace('/', '-', $date);
-                    $firebaseData['presences'][$mois][$formattedDate] = $emargements;  // Assurez-vous d'ajouter les emargements
+                    foreach ($emargements as $emargementKey => $emargementData) {
+                        // Conversion de la date au format correct
+                        $formattedDate = str_replace('/', '-', $date);
+                        // Ajout des données d'émargement dans Firebase
+                        $firebaseData['presences'][$mois][$formattedDate][$emargementKey] = [
+                            'entree' => $emargementData['entree'] ?? null,
+                            'sortie' => $emargementData['sortie'] ?? null,
+                        ];
+                    }
                 }
             }
         }
-
-        // Enregistrer dans Firebase
+    
+        // Ajouter ou mettre à jour les notes, moyennes et appréciations dans les compétences/modules existants
+        if (isset($data['competences'])) {
+            foreach ($data['competences'] as $competenceKey => $modules) {
+                // Vérifier si la compétence existe dans le référentiel
+                if (isset($firebaseData['competences'][$competenceKey])) {
+                    foreach ($modules as $moduleKey => $moduleData) {
+                        // Vérifier si le module existe dans la compétence du référentiel
+                        if (isset($firebaseData['competences'][$competenceKey]['modules'][$moduleKey])) {
+                            // Calcul de la moyenne des notes du module
+                            $notes = $moduleData['notes'] ?? [];
+                            $moyenne = count($notes) > 0 ? array_sum($notes) / count($notes) : 0;
+    
+                            // Mettre à jour les notes, moyennes, et appréciations sans ajouter d'ID
+                            $firebaseData['competences'][$competenceKey]['modules'][$moduleKey]['notes'] = $notes;
+                            $firebaseData['competences'][$competenceKey]['modules'][$moduleKey]['moyenne'] = $moyenne;
+                            $firebaseData['competences'][$competenceKey]['modules'][$moduleKey]['appreciation'] = $moduleData['appreciation'] ?? null;
+                        }
+                    }
+                }
+            }
+        }
+    
+        // Stocker les données de l'apprenant dans Firebase
         $firebaseKey = $this->apprenantsRepository->create($firebaseData);
-
+    
+        // Gestion des erreurs liées à l'enregistrement Firebase
         if (isset($firebaseKey['error'])) {
             return $firebaseKey;
         }
-
-        // Envoi de l'email d'authentification
-        $defaultPassword = 'default_password';
-        $defaultPassword = 'passer123';
-        SendAuthEmailJob::dispatch("sididiop53@gmail.com", $defaultPassword, $userData['nom'], $userData['prenom'], $this->qrCodeService, $this->pdfService);
-
-        return $firebaseKey; 
+    
+        // Génération du QR code et préparation des paramètres pour l'envoi
+        $qrcode = $this->qrCodeService->generateQrCode($matricule, "path");
+        $params = [
+            'nom' => $userData['nom'],
+            'password' => "passer123",
+            'email' => $userData['email'],
+            'matricule' => $matricule,
+            'qrcode' => $qrcode
+        ];
+    
+        // Dispatch du job pour envoyer l'email avec les informations
+        SendRelanceJob::dispatch($params);
+    
+        // Retourner la clé Firebase de l'apprenant créé
+        return $firebaseKey;
+    }
+    
+    public function addNotesToApprenant(string $apprenantId, array $notes)
+    {
+        return $this->apprenantsRepository->addNotesToApprenant($apprenantId, $notes);
+    }
+    
+    
+    
+    
+    public function addModuleNotes($moduleId,Request $request)
+    {
+        return $this->apprenantsRepository->addModuleNotes($moduleId, $request);
     }
     public function importApprenants($file, $referentielId)
     {
@@ -128,24 +185,48 @@ class ApprenantsFirebaseService implements ApprenantsFirebaseServiceInterface
   
     public function sendGroupRelance()
     {
-        // Récupérer les apprenants inactifs
+        // Récupère les apprenants inactifs
         $response = $this->findApprenantsInactif();
-        
-        // Vérifier que la réponse contient bien la clé 'apprenants_inactifs'
+        // dd($response);
         if (isset($response->original['apprenants_inactifs'])) {
             $apprenants = $response->original['apprenants_inactifs'];
-            // Parcourir chaque apprenant inactif et dispatcher un job pour envoyer la relance
+    
             foreach ($apprenants as $apprenant) {
-            //   dd($apprenant);
-                $qrcode=$this->qrCodeService->generateQrCode($this->generateMatricule(), "path");
-                // dd($qrcode);
-                SendRelanceJob::dispatch($apprenant['nom'],$apprenant['password'],$apprenant['email'],$this->generateMatricule(),$qrcode);
+                // Génère le QR code
+                $qrcode = $this->qrCodeService->generateQrCode($this->generateMatricule(), "path");
+    
+                // Prépare les paramètres à envoyer dans le job
+                $params = [
+                    'nom' => $apprenant['nom'],
+                    'password' => "passer123",
+                    'email' => $apprenant['email'],
+                    'matricule' => $this->generateMatricule(),
+                    'qrcode' => $qrcode
+                ];
+    
+                // Dispatch du job avec les paramètres
+                SendRelanceJob::dispatch($params);
             }
     
             return response()->json(['message' => 'Relance envoyée à tous les apprenants inactifs.'], 200);
         } else {
             return response()->json(['message' => 'Aucun apprenant inactif trouvé.'], 404);
         }
+    }
+    
+    public function sendAppRelanceById($id)
+    {
+        $apprenant=$this->apprenantsRepository->relancerApprenantById($id);
+        // dd($apprenant);
+        $qrcode = $this->qrCodeService->generateQrCode($this->generateMatricule(), "path");
+                $params = [
+                    'nom' => $apprenant['nom'],
+                    'password' => "passer123",
+                    'email' => $apprenant['email'],
+                    'matricule' => $this->generateMatricule(),
+                    'qrcode' => $qrcode
+                ];
+        SendRelanceJob::dispatch($params); 
     }
     
     public function findApprenantsById($id){

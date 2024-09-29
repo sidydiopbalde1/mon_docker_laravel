@@ -13,26 +13,24 @@ class SendRelanceJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $nom;
-    protected $password;
-    protected $email;
-    protected $qrcode;
-    public $matricule;
+    protected $params;
 
-    public function __construct($nom, $password, $email, $matricule, $qrcode)
+    public function __construct(array $params)
     {
-        $this->nom = $nom;
-        $this->password = $password;
-        $this->email = $email;
-        $this->qrcode = $qrcode; // Correct assignment
-        $this->matricule = $matricule;
+        // Stockage des paramètres dans un tableau
+        $this->params = $params;
     }
 
     public function handle()
     {
-        // Envoi à l'apprenant (plutôt que l'email hardcodé)
-        Mail::to($this->email)->send(
-            new ApprenantCredentialsMail($this->email, $this->password, $this->matricule, $this->qrcode)
+        // Vérification des paramètres essentiels
+        if (!isset($this->params['email']) || !isset($this->params['password']) || !isset($this->params['matricule'])) {
+            throw new \Exception("Les informations de l'apprenant sont incomplètes.");
+        }
+
+        // Envoi de l'email avec les informations de l'apprenant
+        Mail::to($this->params['email'])->send(
+            new ApprenantCredentialsMail($this->params)
         );
     }
 }

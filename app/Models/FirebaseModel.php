@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Factory;
 use App\Jobs\SendRelanceEmail;
+use Illuminate\Http\Request;
 class FirebaseModel 
 {
     protected $database;
@@ -57,7 +58,6 @@ class FirebaseModel
             Ym90L3YxL21ldGFkYXRhL3g1MDkvZmlyZWJhc2UtYWRtaW5zZGstOTk4czclNDBsYXJhdmVsLWdl
             c3Rpb24tcGVkYWdvZ2lxdWUuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLAogICJ1bml2ZXJzZV9k
             b21haW4iOiAiZ29vZ2xlYXBpcy5jb20iCn0=");
-            //  dd(json_decode($firebase_credentiels, true));
             $factory = (new Factory)
                 ->withServiceAccount(json_decode($firebase_credentiels, true))
                 ->withDatabaseUri("https://laravel-gestion-pedagogique-default-rtdb.firebaseio.com/");
@@ -187,37 +187,7 @@ class FirebaseModel
             return response()->json(['message' => 'Erreur serveur'], 500);
         }
     }
-    
-    
-    // public function relancerApprenant($id)
-    // {
-    //     try {
-    //         // Récupérer l'apprenant par son ID dans Firebase
-    //         // $apprenantRef = $this->database->getReference('apprenants')->document($id);
-    //         $apprenant = $apprenantRef->snapshot();
 
-    //         if (!$apprenant->exists()) {
-    //             return response()->json(['message' => 'Apprenant non trouvé'], 404);
-    //         }
-
-    //         $data = $apprenant->data();
-
-    //         // Vérifier si le compte est déjà activé
-    //         if ($data['statut'] === 'Actif') {
-    //             return response()->json(['message' => 'Le compte de l\'apprenant est déjà activé'], 400);
-    //         }
-
-    //         // Envoi du mail de relance via un job
-    //         SendRelanceEmail::dispatch($data['email'], $data['nom'], $data['password']);
-
-    //         return response()->json(['message' => 'Relance envoyée avec succès'], 200);
-
-    //     } catch (Exception $e) {
-    //         return response()->json(['message' => 'Erreur lors de la relance de l\'apprenant', 'error' => $e->getMessage()], 500);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'Erreur serveur', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
     public function setCustomUserClaims($uid, array $claims)
     {
         $this->auth->setCustomUserClaims($uid, $claims);
@@ -352,8 +322,6 @@ class FirebaseModel
         try {
             $reference = $this->database->getReference($path);
             $allReferentiels = $reference->getValue();
-    
-            // Vérifier si le référentiel existe
             $referentielFound = false;
             foreach ($allReferentiels as $key => $referentiel) {
                 if (isset($referentiel['id']) && $referentiel['id'] == (int)$id) {
@@ -559,4 +527,272 @@ class FirebaseModel
 
         return [];
     }
+
+    //---------------------------Gestion_Notes------------------------
+    public function addNotesToApprenant(string $apprenantId, array $notes)
+    {
+        // Appeler la méthode qui gère l'ajout ou la mise à jour des notes dans Firebase
+        $result = $this->addOrUpdateNotesInFirebase($apprenantId, $notes);
+    
+        // Retourner le résultat de l'opération
+        if ($result['status'] === 200) {
+            return ['success' => 'Notes mises à jour avec succès.', 'status' => 200];
+        } else {
+            return ['error' => $result['error'], 'status' => $result['status']];
+        }
+    }
+    
+    public function addOrUpdateNotesInFirebase(string $apprenantId, array $newNotes)
+    {
+        $reference = $this->database->getReference('apprenants/'.$apprenantId);
+        $apprenant = $reference->getValue();
+        
+        if (!$apprenant || !is_array($apprenant)) {
+            return ['error' => 'Apprenant non trouvé ou données invalides.', 'status' => 404];
+        }
+        if (!isset($apprenant['referentiels']) || !is_array($apprenant['referentiels'])) {
+            return ['error' => 'Aucun référentiel trouvé pour cet apprenant ou structure des données incorrecte.', 'status' => 404];
+        }
+        foreach ($newNotes as $newNote) {
+            $moduleFound = false;
+            foreach ($apprenant['referentiels'] as $referentiel) {
+                    $competences=$apprenant['referentiels']['competences'];
+                foreach ($competences as &$competence) {
+                    foreach ($competence['modules'] as &$module) {
+                        if (isset($module['nom']) && $module['nom'] === $newNote['module']) {
+                            if (!isset($module['notes']) || !is_array($module['notes'])) {
+                                $module['notes'] = [];
+                            }
+                            $module['notes'][] = $newNote['note'];
+                        
+                            $module['moyenne'] = array_sum($module['notes']) / count($module['notes']);
+                            $moduleFound = true;
+                            // dd($apprenant['referentiels']);
+                            break;
+                        }
+                    }
+
+                    if ($moduleFound) {
+                        break;
+                    }
+                }
+                if (!$moduleFound) {
+                    // Ajouter un nouveau module avec la note
+                    $referentiel['competences'][] = [
+                        'nom' => $newNote['module'],
+                        'notes' => [$newNote['note']],
+                        'moyenne' => $module['moyenne'] , // Première note ajoutée devient la moyenne
+                        'appreciation' => '', // Champ d'appréciation vide par défaut (ou autre logique)
+                        'description' => '', // Description vide ou autre logique
+                        'duree_acquisition' => 0 // Durée par défaut ou autre logique
+                    ];
+                }
+            }
+        }
+    
+            // Utilisation de set() pour remplacer les référentiels
+    $ref=$this->database->getReference('apprenants/'.$apprenantId)->getChild('referentiels')->set($apprenant['referentiels']);
+    // dd($ref);
+        // Retourner la réponse de succès
+        return ['success' => 'Notes mises à jour avec succès.', 'status' => 200,'data' => $ref];
+    }
+    
+    public function updateNotes(Request $request, $apprenantId)
+    {
+        $reference = $this->database->getReference('apprenants/' . $apprenantId);
+        $apprenant = $reference->getValue();
+
+        // Vérification si l'apprenant existe
+        if (!$apprenant || !is_array($apprenant)) {
+            return response()->json(['error' => 'Apprenant non trouvé ou données invalides.'], 404);
+        }
+
+        // Boucle sur les nouvelles notes pour mise à jour
+        foreach ($request->input('notes') as $newNote) {
+            $noteId = $newNote['noteId'];
+            $noteValue = $newNote['note'];
+
+            // Parcourir les référentiels et modules pour trouver et mettre à jour la note
+            foreach ($apprenant['referentiels'] as &$referentiel) {
+                foreach ($referentiel['competences'] as &$competence) {
+                    foreach ($competence['modules'] as &$module) {
+                        if (isset($module['notes'][$noteId])) {
+                            $module['notes'][$noteId] = $noteValue;
+                            $module['moyenne'] = array_sum($module['notes']) / count($module['notes']);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Mettre à jour dans Firebase
+        $reference->set($apprenant);
+        return response()->json(['success' => 'Notes mises à jour avec succès.'], 200);
+    }
+
+    public function listNotesByReferentiel($referentielId)
+    {
+        $reference = $this->database->getReference('apprenants');
+        $apprenants = $reference->getValue();
+
+        if (!$apprenants || !is_array($apprenants)) {
+            return response()->json(['error' => 'Aucun apprenant trouvé.'], 404);
+        }
+
+        $notes = [];
+        foreach ($apprenants as $apprenantId => $apprenant) {
+            foreach ($apprenant['referentiels'] as $referentiel) {
+                if ($referentiel['id'] == $referentielId) {
+                    $notes[$apprenantId] = $referentiel['competences'];
+                }
+            }
+        }
+
+        return response()->json(['notes' => $notes], 200);
+    }
+
+    
+    
+
+    public function addModuleNotes1($moduleId, Request $request)
+    {
+        // Récupérer les données de la requête
+        $notesData = $request->input('notes');
+        
+        if (empty($notesData)) {
+            return response()->json(['error' => 'Aucune donnée de note fournie.'], 400);
+        }
+    
+        // Récupérer la promotion active (à adapter à votre logique pour récupérer la promotion en cours)
+        $promotion = $this->getLibelleActivePromotion(); // Adaptez cette méthode à votre logique
+    
+        if (!$promotion) {
+            return response()->json(['error' => 'Aucune promotion en cours.'], 404);
+        }
+    
+        // Récupérer les apprenants par promotion
+        $apprenantsInPromotion = $this->getApprenantsByPromotion($promotion);
+    
+        if (empty($apprenantsInPromotion)) {
+            return response()->json(['error' => 'Aucun apprenant trouvé pour la promotion en cours.'], 404);
+        }
+    
+        // Boucle sur chaque ensemble de notes fournies
+        foreach ($notesData as $noteData) {
+            $apprenantIds = $noteData['apprenantIds']; // IDs des apprenants concernés
+            $note = $noteData['note'];
+    
+            // Boucle sur chaque apprenant pour ajouter la note
+            foreach ($apprenantIds as $apprenantId) {
+                if (!isset($apprenantsInPromotion[$apprenantId])) {
+                    // Vérifier si l'apprenant est dans la promotion en cours
+                    return response()->json(['error' => "Apprenant ID: $apprenantId n'appartient pas à la promotion."], 403);
+                }
+    
+                // Récupérer les données de l'apprenant depuis Firebase
+                $apprenantData = $this->findNoeudById($apprenantId, 'apprenants');
+                
+                if (!$apprenantData) {
+                    return response()->json(['error' => "Apprenant ID: $apprenantId non trouvé."], 404);
+                }
+    
+                // Parcourir les compétences de l'apprenant
+                foreach ($apprenantData['competences'] as &$competence) {
+                    foreach ($competence['modules'] as &$module) {
+                        // Vérifier si c'est le module correct
+                        if ($module['id'] === $moduleId) {
+                            // Ajouter la note si elle n'existe pas déjà
+                            $module['notes'][] = $note;
+    
+                            // Recalculer la moyenne
+                            $module['moyenne'] = array_sum($module['notes']) / count($module['notes']);
+    
+                            // Mettre à jour les données dans Firebase
+                            $this->updateApprenantInFirebase($apprenantId, ['competences' => $apprenantData['competences']]);
+                            
+                            break; // Sortir de la boucle des modules une fois la note ajoutée
+                        }
+                    }
+                }
+            }
+        }
+    
+        return response()->json(['message' => 'Les notes ont été ajoutées avec succès.'], 200);
+    }
+     
+    // Méthode pour mettre à jour l'apprenant dans Firebase
+    protected function updateApprenantInFirebase($apprenantId, $data)
+    {
+        $this->database->getReference("apprenants/{$apprenantId}")->update($data);
+    }
+    
+    // Méthode pour récupérer les apprenants par promotion dans Firebase
+    protected function getApprenantsByPromotion()
+    {
+            // Récupérer la promotion active
+            $promotion = $this->getActivePromotion();
+                
+            // Extraire la première clé de la promotion (car la structure a une clé aléatoire unique)
+            $promotionKey = array_key_first($promotion);
+            
+            // Accéder aux référentiels à partir de la clé trouvée
+            $referentiels = $promotion[$promotionKey]['referentiels'];
+            
+            // Initialiser un tableau pour stocker les apprenants
+            $apprenants = [];
+            
+            // Vérifier que les référentiels existent et sont bien un tableau
+            if (is_array($referentiels)) {
+                // Parcourir chaque référentiel
+                foreach ($referentiels as $referentiel) {
+                    // Vérifier que le référentiel contient des apprenants
+                    if (isset($referentiel['apprenants']) && is_array($referentiel['apprenants'])) {
+                        // Ajouter chaque apprenant au tableau
+                        foreach ($referentiel['apprenants'] as $apprenant) {
+                            $apprenants[] = $apprenant;
+                        }
+                    }
+                }
+            }
+            // dd($apprenants);
+            // Retourner la liste des apprenants
+            return $apprenants;
+    }
+    
+    
+    // protected function getIdActivePromotion()
+    // {
+    //     // Remplacez cela par la logique pour récupérer la promotion active
+    //     $activePromotion = $this->database->getReference('promotions')
+    //         ->orderByChild('etat')
+    //         ->equalTo('Actif')
+    //         ->getSnapshot();
+
+    //     return $activePromotion->getValue() ? key($activePromotion->getValue()) : null; // Retourne l'ID de la première promotion active trouvée
+    // }
+    protected function getLibelleActivePromotion()
+    {
+        // Récupérer les données des promotions en fonction de l'état 'Actif'
+        $activePromotionSnapshot = $this->database->getReference('promotions')
+            ->orderByChild('etat')
+            ->equalTo('Actif')
+            ->getSnapshot();
+
+        $activePromotions = $activePromotionSnapshot->getValue();
+
+        if ($activePromotions) {
+            // Parcourir les promotions actives (au cas où il y aurait plusieurs)
+            foreach ($activePromotions as $promoData) {
+                if (isset($promoData['libelle'])) {
+                    // Retourner le libellé de la première promotion active trouvée
+                    return $promoData['libelle'];
+                }
+            }
+        }
+
+        // Si aucune promotion active n'est trouvée, retourner null ou une chaîne vide
+        return null;
+    }
+
 }
+

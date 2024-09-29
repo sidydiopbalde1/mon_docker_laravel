@@ -1,7 +1,7 @@
 <?php
 namespace App\Repository;
-use App\Facades\ApprenantsFirebaseFacade; 
-
+use App\Facades\ApprenantsFirebaseFacade;
+use Illuminate\Http\Request;
 class ApprenantsFirebaseRepository implements ApprenantsFirebaseRepositoryInterface
 {
     protected $firebasePath = 'apprenants'; 
@@ -10,7 +10,14 @@ class ApprenantsFirebaseRepository implements ApprenantsFirebaseRepositoryInterf
     {
         return ApprenantsFirebaseFacade::create($this->firebasePath, $data);
     }
-
+    public function addModuleNotes($moduleId,Request $request)
+    {
+        return ApprenantsFirebaseFacade::addModuleNotes($moduleId,$request);
+    }
+    public function addNotesToApprenant(string $apprenantId, array $notes)
+    {
+        return ApprenantsFirebaseFacade::addNotesToApprenant($apprenantId, $notes);
+    }
     public function update(string $id, array $data)
     {
         return ApprenantsFirebaseFacade::update($this->firebasePath, $id, $data);
@@ -27,6 +34,9 @@ class ApprenantsFirebaseRepository implements ApprenantsFirebaseRepositoryInterf
     public function findApprenantById( $id)
     {
         return ApprenantsFirebaseFacade::findNoeudById($id,"users");
+    }
+    public function relancerApprenantById($id){
+        return ApprenantsFirebaseFacade::relancerApprenantById($id);
     }
     public function findApprenantBy_ID($id,array $filters)
     {

@@ -22,7 +22,7 @@ class FirebaseAuthController extends Controller implements AuthentificationServi
 
     public function __construct(FirebaseServiceInterface $firebaseService)
     {
-        $factory = (new Factory)->withServiceAccount(env('FIREBASE_CREDENTIALS'));
+        $factory = (new Factory)->withServiceAccount(json_decode(base64_decode(env('FIREBASE_KEY_BASE64')),true));
         $this->firebaseAuth = $factory->createAuth();
         $this->firebaseService = $firebaseService;
     }

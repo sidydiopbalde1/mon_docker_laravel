@@ -13,7 +13,7 @@ class FirebaseService implements FirebaseServiceInterface
     public function __construct()
     {
         $factory = (new Factory)
-            ->withServiceAccount(env('FIREBASE_CREDENTIALS'))
+            ->withServiceAccount(json_decode(base64_decode(env('FIREBASE_KEY_BASE64')),true))
             ->withDatabaseUri(env('FIREBASE_DATABASE_URL'));
 
         $this->database = $factory->createDatabase();
